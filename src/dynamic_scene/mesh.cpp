@@ -79,22 +79,23 @@ namespace CMU462 {
 
 					// find where this vertex would end up (in world coors) if it were transformed along with bone j
 					Matrix4x4 tr = j->getTransformation();
-					Vector3D v_ij = tr * pos_v_relative_to_j;
+					Vector3D v_ij = tr * j->getRotation() * pos_v_relative_to_j;
+					//Vector3D v_ij = tr * v->position;
 
 					// Find the closest point on joint j's bone segment (axis) and compute the distance to this closest point.
 					//		?? is `axis` the closest point?
 					//Vector3D endPos = j->position + j->axis;
-					Vector3D pt_we_want = 0;
-					if (j->axis.norm() > 0) {
-						double try_dist = dot(v_ij, j->axis.unit());
+					Vector3D pt_closest = 0;
+					if (j->axis.norm() > 0) { 
+						double try_dist = dot(pos_v_relative_to_j, j->axis.unit());
 						if (try_dist < 0) try_dist = 0;
 						else if (try_dist > j->axis.norm()) try_dist = j->axis.norm();
-						pt_we_want = j->axis.unit() * try_dist;
+						pt_closest = j->axis.unit() * try_dist;
 					}
 
 
 					//cout << "pt_we_want: " << pt_we_want << endl;
-					double dist_ij = (v_ij - pt_we_want).norm();
+					double dist_ij = (pos_v_relative_to_j - pt_closest).norm();
 					//cout << "dist_ij: " << dist_ij << endl;
 					 
 					//double dist_ij = (v_ij - j->axis).norm();
