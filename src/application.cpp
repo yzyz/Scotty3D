@@ -323,6 +323,38 @@ void Application::render() {
       };
 
       if (action == Action::Rasterize_Video) {
+        { // scope for using statements
+          using CMU462::DynamicScene::Mesh;
+          using CMU462::DynamicScene::RenderMask;
+
+          //glEnable(GL_DEPTH_TEST);
+          glEnable(GL_CULL_FACE);
+          Mesh::flip_normals = true;
+          Mesh::global_render_mask = RenderMask::FACE;
+
+          glBindFramebuffer(GL_FRAMEBUFFER, backface_fbo);
+          glCullFace(GL_BACK);
+          glFrontFace(GL_CW);
+          //render_fn(true);
+          scene->render_splines_at(timeline.getCurrentFrame(),
+            timeline.isCurrentlyPlaying(), useCapsuleRadius, true);
+
+          Mesh::flip_normals = false;
+
+          glBindFramebuffer(GL_FRAMEBUFFER, frntface_fbo);
+          glFrontFace(GL_CCW);
+          //render_fn(true);
+          scene->render_splines_at(timeline.getCurrentFrame(),
+            timeline.isCurrentlyPlaying(), useCapsuleRadius, true);
+
+          glDisable(GL_CULL_FACE);
+          Mesh::global_render_mask = RenderMask::ALL;
+
+          glBindFramebuffer(GL_FRAMEBUFFER, 0);
+          //render_fn(false);
+          scene->render_splines_at(timeline.getCurrentFrame(),
+            timeline.isCurrentlyPlaying(), useCapsuleRadius, false);
+        }
         rasterize_video();
         return;
       }
