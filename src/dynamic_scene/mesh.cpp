@@ -69,7 +69,7 @@ namespace CMU462 {
 				dists_ij[v] = 0;
 				//cout << "dists_ij[v]: " << dists_ij[v] << endl;
 				Vector3D numerator = 0;
-
+				bool has_affected = false;
 				for (int k = 0; k < skeleton->joints.size(); k++) {
 					Joint* j = skeleton->joints[k];
 					// compute v's position with respect to each joint j (in j's coordinate frame) where no transformations have been applied to the skeleton (bind pose, vertex bind position).
@@ -92,7 +92,12 @@ namespace CMU462 {
 						else if (try_dist > j->axis.norm()) try_dist = j->axis.norm();
 						pt_closest = j->axis.unit() * try_dist;
 					}
-
+					if (useCapsuleRadius) {
+						if ((pos_v_relative_to_j - pt_closest).norm() > j->capsuleRadius * 2) {
+							continue;
+						}
+					}
+					has_affected = true;
 
 					//cout << "pt_we_want: " << pt_we_want << endl;
 					double dist_ij = (pos_v_relative_to_j - pt_closest).norm();
@@ -114,6 +119,7 @@ namespace CMU462 {
 
 				}
 				if (dists_ij[v] == 0) continue;
+				if (has_affected == false) continue;
 				/*cout << "dists_ij[v]: " << dists_ij[v] << endl;*/
 				Vector3D the_new_pos = numerator / dists_ij[v];
 
