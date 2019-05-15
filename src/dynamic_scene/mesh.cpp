@@ -80,11 +80,8 @@ namespace CMU462 {
 					// find where this vertex would end up (in world coors) if it were transformed along with bone j
 					Matrix4x4 tr = j->getTransformation();
 					Vector3D v_ij = tr * j->getRotation() * pos_v_relative_to_j;
-					//Vector3D v_ij = tr * v->position;
 
 					// Find the closest point on joint j's bone segment (axis) and compute the distance to this closest point.
-					//		?? is `axis` the closest point?
-					//Vector3D endPos = j->position + j->axis;
 					Vector3D pt_closest = 0;
 					if (j->axis.norm() > 0) { 
 						double try_dist = dot(pos_v_relative_to_j, j->axis.unit());
@@ -99,21 +96,13 @@ namespace CMU462 {
 					}
 					has_affected = true;
 
-					//cout << "pt_we_want: " << pt_we_want << endl;
 					double dist_ij = (pos_v_relative_to_j - pt_closest).norm();
-					//cout << "dist_ij: " << dist_ij << endl;
-					 
-					//double dist_ij = (v_ij - j->axis).norm();
 
 					numerator += v_ij / dist_ij;
 					dists_ij[v] += 1.0/dist_ij;
 					//cout << "dists_ij[v]: " << dists_ij[v] << endl;
 
-					// Store the transformed location and distance for each j in an LBSInfo structure, which has been defined for you in dynamic_scene/mesh.h.
-					LBSInfo l = LBSInfo();
-					l.blendPos = v_ij;
-					l.distance = dist_ij;
-					//stuffs.push_back(l);
+
 
 					// Compute the resulting position of the vertex by doing a weighted average of the positions from each bone, as stored in the LBSInfo structures. The weights for the weighted average should be the inverse distance to the joint, so closer bones have a stronger influence.
 
