@@ -61,13 +61,9 @@ namespace CMU462 {
 			if (skeleton->joints.size() <= 0) {
 				return;
 			}
-			//vector<LBSInfo> stuffs;
-			map<VertexIter, double> dists_ij;
 			
 			for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
-				//dists_ij.insert(v, 0);
-				dists_ij[v] = 0;
-				//cout << "dists_ij[v]: " << dists_ij[v] << endl;
+        double wsum = 0;
 				Vector3D numerator = 0;
 				bool has_affected = false;
 				for (int k = 0; k < skeleton->joints.size(); k++) {
@@ -83,34 +79,37 @@ namespace CMU462 {
 
 					// Find the closest point on joint j's bone segment (axis) and compute the distance to this closest point.
 					Vector3D pt_closest = 0;
-					if (j->axis.norm() > 0) { 
+          double axis_length = j->axis.norm();
+					if (axis_length > 0) { 
 						double try_dist = dot(pos_v_relative_to_j, j->axis.unit());
 						if (try_dist < 0) try_dist = 0;
-						else if (try_dist > j->axis.norm()) try_dist = j->axis.norm();
+						else if (try_dist > axis_length) try_dist = axis_length;
 						pt_closest = j->axis.unit() * try_dist;
 					}
-					if (useCapsuleRadius) {
-						if ((pos_v_relative_to_j - pt_closest).norm() > j->capsuleRadius * 2) {
+
+<<<<<<< HEAD
+					double dist_ij = (pos_v_relative_to_j - pt_closest).norm();
+=======
+          double dist_ij = (pos_v_relative_to_j - pt_closest).norm();
+					if (useCapsuleRadius && dist_ij > j->capsuleRadius)
 							continue;
-						}
-					}
+>>>>>>> d45d69c4de3e8c5bf670de884a6611d4e5f399d8
+
 					has_affected = true;
 
-					double dist_ij = (pos_v_relative_to_j - pt_closest).norm();
+<<<<<<< HEAD
 
-					numerator += v_ij / dist_ij;
-					dists_ij[v] += 1.0/dist_ij;
-					//cout << "dists_ij[v]: " << dists_ij[v] << endl;
-
-
+=======
+          double w = 1.0 / dist_ij;
+					numerator += v_ij * w;
+          wsum += w;
+>>>>>>> d45d69c4de3e8c5bf670de884a6611d4e5f399d8
 
 					// Compute the resulting position of the vertex by doing a weighted average of the positions from each bone, as stored in the LBSInfo structures. The weights for the weighted average should be the inverse distance to the joint, so closer bones have a stronger influence.
 
 				}
-				if (dists_ij[v] == 0) continue;
-				if (has_affected == false) continue;
-				/*cout << "dists_ij[v]: " << dists_ij[v] << endl;*/
-				Vector3D the_new_pos = numerator / dists_ij[v];
+				if (wsum == 0 || !has_affected) continue;
+				Vector3D the_new_pos = numerator / wsum;
 
 				v->position = the_new_pos;
 
